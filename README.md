@@ -9,7 +9,4 @@ This project includes our Java implementations of four main cryptography algorit
 
 We built all of them from scratch during our studies to understand how each algorithm works internally. We didn’t use any built-in Java crypto libraries — just pure Java and logic. This is a learning project and not meant for real-world security or production use.
 
----
-
-## 📁 Project Structure
 
