@@ -1,0 +1,145 @@
+RSA
+
+
+import java.util.Scanner;
+
+public class Main {
+
+    // Check if a number is prime
+    public static boolean isPrime(int num) {
+        if (num <= 1) return false;
+        if (num == 2) return true;
+        if (num % 2 == 0) return false;
+        for (int i = 3; i * i <= num; i += 2) {
+            if (num % i == 0) return false;
+        }
+        return true;
+    }
+
+    // Calculate GCD
+    public static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+
+    // Extended Euclidean Algorithm to find GCD and coefficients
+    public static int[] extendedGcd(int a, int b) {
+        if (b == 0) {
+            return new int[] { a, 1, 0 }; // {gcd, x, y} where ax + by = gcd
+        }
+        int[] vals = extendedGcd(b, a % b);
+        int gcd = vals[0];
+        int x1 = vals[1];
+        int y1 = vals[2];
+        int x = y1;
+        int y = x1 - (a / b) * y1;
+        return new int[] { gcd, x, y };
+    }
+
+    // Find modular inverse of e mod phi using Extended Euclidean Algorithm
+    public static int modInverse(int e, int phi) {
+        int[] coeffs = extendedGcd(e, phi);
+        int gcd = coeffs[0];
+        int x = coeffs[1];
+        if (gcd != 1) {
+            return -1; // Modular inverse doesn't exist
+        }
+        // Ensure x is positive and within [0, phi)
+        return (x % phi + phi) % phi;
+    }
+
+    // Fast modular exponentiation
+    public static int modPow(int base, int exponent, int mod) {
+        int result = 1;
+        base = base % mod;
+        while (exponent > 0) {
+            if ((exponent & 1) == 1) {
+                result = (result * base) % mod;
+            }
+            exponent >>= 1;
+            base = (base * base) % mod;
+        }
+        return result;
+    }
+
+    // Encrypt string message
+    public static String encryptString(String msg, int e, int n) {
+        StringBuilder encrypted = new StringBuilder();
+        for (char c : msg.toCharArray()) {
+            int m = (int) c;
+            int ciph = modPow(m, e, n);
+            encrypted.append(ciph).append(" ");
+        }
+        return encrypted.toString().trim();
+    }
+
+    // Decrypt string message
+    public static String decryptString(String cipherText, int d, int n) {
+        StringBuilder decrypted = new StringBuilder();
+        String[] parts = cipherText.split(" ");
+        for (String part : parts) {
+            int ciph = Integer.parseInt(part);
+            int plain = modPow(ciph, d, n);
+            decrypted.append((char) plain);
+        }
+        return decrypted.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int p = 0, q = 0;
+
+        // Step 1: Get primes p and q
+        System.out.println("Enter two distinct prime numbers (e.g., 17 19):");
+        while (true) {
+            try {
+                String[] input = scanner.nextLine().trim().split(" ");
+                if (input.length == 2) {
+                    p = Integer.parseInt(input[0]);
+                    q = Integer.parseInt(input[1]);
+                    if (isPrime(p) && isPrime(q) && p != q) break;
+                }
+            } catch (Exception e) {}
+            System.out.println("Invalid input. Please enter two distinct prime numbers:");
+        }
+
+        int n = p * q;
+        int phi = (p - 1) * (q - 1);
+
+        if (n <= 127) {
+            System.out.println("Error: n must be > 127 to handle string encryption.");
+            return;
+        }
+
+        // Step 2: Get e from user
+        int e = 0;
+        while (true) {
+            try {
+                System.out.println("Enter a public exponent e (1 < e < " + phi + ") such that gcd(e, " + phi + ") = 1:");
+                e = Integer.parseInt(scanner.nextLine());
+                if (e > 1 && e < phi && gcd(e, phi) == 1) break;
+            } catch (Exception ex) {}
+            System.out.println("Invalid e. Try again.");
+        }
+
+        // Step 3: Calculate private key d
+        int d = modInverse(e, phi);
+        if (d == -1) {
+            System.out.println("Failed to compute modular inverse of e. Try different values.");
+            return;
+        }
+
+        // Print keys
+        System.out.println("\nPublic Key (e, n): (" + e + ", " + n + ")");
+        System.out.println("Private Key (d, n): (" + d + ", " + n + ")");
+
+        // Step 4: Encrypt message
+        System.out.println("\nEnter a message to encrypt:");
+        String message = scanner.nextLine();
+        String cipher = encryptString(message, e, n);
+        System.out.println("Encrypted message: " + cipher);
+
+        // Step 5: Decrypt message
+        String decrypted = decryptString(cipher, d, n);
+        System.out.println("Decrypted message: " + decrypted);
+    }
+}

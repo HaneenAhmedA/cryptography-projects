@@ -1,0 +1,96 @@
+LFSR only missing the decryption
+
+
+import java.util.Scanner;
+
+public class LFSR {
+    private char[] register;
+    private char[] feedbackPoly;
+
+    public LFSR(String seed, String feedbackPoly) {
+        this.register = seed.toCharArray();
+        this.feedbackPoly = feedbackPoly.toCharArray();
+    }
+
+    public int Tap_Positions() {
+        int feedback = 0;
+
+        for (int i = 0; i < feedbackPoly.length; i++) {
+            if (feedbackPoly[i] == '1') {
+                feedback ^= (register[i] - '0');
+            }
+        }
+
+        int outputBit = register[register.length - 1] - '0';
+
+        for (int i = register.length - 1; i > 0; i--) {
+            register[i] = register[i - 1];
+        }
+
+        register[0] = (char) (feedback + '0');
+
+        return outputBit;
+    }
+
+    public String KeystreamSequence(int length) {
+        StringBuilder sequence = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            sequence.append(Tap_Positions());
+        }
+        return sequence.toString();
+    }
+
+    public String xorMessage(String message) {
+        String keystream = KeystreamSequence(message.length());
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < message.length(); i++) {
+            result.append((char) (((message.charAt(i) - '0') ^ (keystream.charAt(i) - '0')) + '0'));
+        }
+        return result.toString();
+    }
+
+    public static boolean Testing(String input, int length) {
+        if (input.length() != length) return false;
+        for (char c : input.toCharArray()) {
+            if (c != '0' && c != '1') return false;
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the size of the LFSR : ");
+        int size = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.print("Enter the initial seed (of length " + size + " in 0s & 1s): ");
+        String seed = scanner.nextLine();
+        if (!Testing(seed, size)) {
+            System.out.println("Invalid seed! Try again.");
+            return;
+        }
+
+        System.out.print("Enter the feedback polynomial (of length " + size + " in 0s & 1s): ");
+        String feedbackPoly = scanner.nextLine();
+        if (!Testing(feedbackPoly, size)) {
+            System.out.println("Invalid feedback polynomial! Try again.");
+            return;
+        }
+
+        LFSR lfsr = new LFSR(seed, feedbackPoly);
+        System.out.println("the sequence (keystream) is : " + lfsr.KeystreamSequence(100));
+
+        System.out.print("Enter a plaintext message to encrypt : ");
+        String plaintext = scanner.nextLine();
+        if (!Testing(plaintext, plaintext.length())) {
+            System.out.println("Invalid plaintext! Try again.");
+            return;
+        }
+
+        System.out.println("the ciphertext is : " + lfsr.xorMessage(plaintext));
+
+        scanner.close();
+    }
+}
