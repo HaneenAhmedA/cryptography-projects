@@ -1,2 +1,15 @@
-# cryptography-projects
-This repo includes our Java implementations of some important cryptographic algorithms: LFSR, DES, AES, and RSA. We worked on this as students to understand how these algorithms actually work under the hood, without using built-in crypto libraries. It’s just for learning and experimenting — not for real security use!
+# 🔐 Cryptography Algorithms in Java
+
+This project includes our Java implementations of four main cryptography algorithms:
+
+- **LFSR** – Linear Feedback Shift Register  
+- **DES** – Data Encryption Standard  
+- **AES** – Advanced Encryption Standard  
+- **RSA** – Rivest–Shamir–Adleman
+
+We built all of them from scratch during our studies to understand how each algorithm works internally. We didn’t use any built-in Java crypto libraries — just pure Java and logic. This is a learning project and not meant for real-world security or production use.
+
+---
+
+## 📁 Project Structure
+
